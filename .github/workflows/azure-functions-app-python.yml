@@ -54,10 +54,14 @@ jobs:
          cd ${{ matrix.app.folder }}
          ls -la          
 
-      - name: Create ZIP package
+      # - name: Create ZIP package
+      #   run: |
+      #     cd ${{ matrix.app.folder }}
+      #     zip -r ./${{ matrix.app.folder }}.zip .
+      - name: Zip artifact for deployment 
         run: |
           cd ${{ matrix.app.folder }}
-          zip -r ./${{ matrix.app.folder }}.zip .
+          zip ${{ matrix.app.folder }}.zip ./* -r 
 
       - name: List files after ZIP creation
         run: ls -R 
@@ -71,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ./${{ matrix.app.folder }}.zip
+          path: ${{ matrix.app.folder }}.zip
 
   build-and-deploy-dev:
     runs-on: ubuntu-latest
@@ -122,13 +126,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ./${{ matrix.app.folder }}.zip
+          # path: ./${{ matrix.app.folder }}.zip
 
       - name:  Verify ZIP file
         run: ls -la ./
 
-      # - name: Unzip artifact for deployment
-      #   run: unzip ${{ matrix.app.folder }}.zip
+      - name: Unzip artifact for deployment
+        run: unzip ${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
         run: ls -la ./        
@@ -145,7 +149,8 @@ jobs:
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
-          package: ./${{ matrix.app.folder }}.zip
+          # package: ./${{ matrix.app.folder }}.zip
+          package: '.'
           scm-do-build-during-deployment: true
           enable-oryx-build: true
 
