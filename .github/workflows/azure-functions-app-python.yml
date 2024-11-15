@@ -127,6 +127,12 @@ jobs:
       - name:  Verify ZIP file
         run: ls -la ./
 
+      - name: Unzip artifact for deployment
+        run: unzip ../${{ matrix.app.folder }}.zip
+        
+      - name:  Verify ZIP file
+        run: ls -la ./        
+
       - name: 'Login via Azure CLI'
         # if: env.deploy == 'true'
         uses: azure/login@v1
@@ -139,7 +145,7 @@ jobs:
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
-          package: ./${{ matrix.app.folder }}.zip 
+          package: ./${{ matrix.app.folder }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
 
