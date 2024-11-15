@@ -32,7 +32,8 @@ jobs:
             echo "deploy=true" >> $GITHUB_ENV
           else
             echo "No changes in ${{ matrix.app.folder }}."
-            echo "deploy=false" >> $GITHUB_ENV         
+            echo "deploy=false" >> $GITHUB_ENV 
+          fi          
 
       - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
         uses: actions/setup-python@v4
