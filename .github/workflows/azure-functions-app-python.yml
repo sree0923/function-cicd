@@ -37,7 +37,7 @@ jobs:
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}  
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
         #if: contains(github.event.head_commit.message, matrix.app.folder) # Check if commit includes folder changes
