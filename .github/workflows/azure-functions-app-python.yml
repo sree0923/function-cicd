@@ -125,15 +125,11 @@ jobs:
           path: ./${{ matrix.app.folder }}.zip
 
       - name:  Verify ZIP file
-        run: ls -la ./fn-dev1/
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20            
+        run: ls -la ./${{ matrix.app.folder }}/
 
       - name: 'Login via Azure CLI'
         # if: env.deploy == 'true'
-        uses: azure/login@v1.1
+        uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
