@@ -112,18 +112,18 @@ jobs:
           path: ${{ matrix.app.folder }}/function_app.zip
 
       - name: 'Login via Azure CLI'
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         #if: contains(github.event.head_commit.message, matrix.app.folder) # Check if commit includes folder changes
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
-          package: ./${{ matrix.app.folder }}
+          package: ${{ matrix.app.folder }}/function_app.zip 
 
   build-and-deploy-qa:
     runs-on: ubuntu-latest
@@ -150,7 +150,7 @@ jobs:
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
-          package: ${{ matrix.app.folder }}/${{ matrix.app.folder }}_function_app.zip        
+          package: ${{ matrix.app.folder }}/function_app.zip        
 
         
 
