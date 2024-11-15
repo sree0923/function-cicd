@@ -127,16 +127,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
-          # path: ./${{ matrix.app.folder }}.zip
+          path: ./${{ matrix.app.folder }}.zip
 
       - name:  Verify ZIP file
         run: ls -la ./
 
       - name: Unzip artifact for deployment
-        run: unzip -o ./${{ matrix.app.folder }}.zip -d ./${{ matrix.app.folder }}
+        run: unzip -o ./${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
-        run: ls -la ./${{ matrix.app.folder }}        
+        run: ls -la ./      
 
       - name: 'Login via Azure CLI'
         # if: env.deploy == 'true'
@@ -151,7 +151,7 @@ jobs:
         with:
           app-name: ${{ matrix.app.name }}
           # package: ./${{ matrix.app.folder }}.zip
-          package: ./${{ matrix.app.folder }}
+          package: '.'
           scm-do-build-during-deployment: true
           enable-oryx-build: true
 
