@@ -41,7 +41,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
   
       - name: 'Resolve Project Dependencies Using Pip'
-        if: env.deploy == 'true'
+        #if: env.deploy == 'true'
         shell: bash
         run: |
           cd ${{ matrix.app.folder }}
