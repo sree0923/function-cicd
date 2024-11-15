@@ -129,7 +129,7 @@ jobs:
 
       - name: 'Login via Azure CLI'
         # if: env.deploy == 'true'
-        uses: azure/login@v1
+        uses: azure/login@v1.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
