@@ -11,6 +11,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: build
     strategy:
       matrix:
         app:
@@ -139,7 +140,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4       
+        uses: actions/checkout@v4 
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+         name: ${{ matrix.app.folder }}-build
+         path: ${{ matrix.app.folder }}/function_app.zip        
 
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
