@@ -127,7 +127,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ./${{ matrix.app.folder }}.zip
+          # path: ./${{ matrix.app.folder }}.zip
 
       - name:  Verify ZIP file
         run: ls -la ./
