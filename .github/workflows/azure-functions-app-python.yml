@@ -112,7 +112,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ${{ matrix.app.folder }}/function_app.zip
+          path: ./${{ matrix.app.folder }}/function_app.zip
+
+      - name:  Verify ZIP file
+        run: ls -la ./fn-dev1/          
 
       - name: 'Login via Azure CLI'
         # if: env.deploy == 'true'
