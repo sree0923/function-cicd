@@ -58,10 +58,11 @@ jobs:
       #   run: |
       #     cd ${{ matrix.app.folder }}
       #     zip -r ./${{ matrix.app.folder }}.zip .
-      - name: Zip artifact for deployment 
-        run: |
-          cd ${{ matrix.app.folder }}
-          zip ${{ matrix.app.folder }}.zip ./* -r 
+
+      # - name: Zip artifact for deployment 
+      #   run: |
+      #     cd ${{ matrix.app.folder }}
+      #     zip ${{ matrix.app.folder }}.zip ./* -r 
 
       - name: List files after ZIP creation
         run: ls -R 
@@ -75,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ${{ matrix.app.folder }}.zip
+          path: ./${{ matrix.app.folder }}.zip
 
   build-and-deploy-dev:
     runs-on: ubuntu-latest
