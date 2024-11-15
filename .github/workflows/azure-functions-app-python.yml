@@ -125,7 +125,7 @@ jobs:
           path: ./${{ matrix.app.folder }}.zip
 
       - name:  Verify ZIP file
-        run: ls -la ./${{ matrix.app.folder }}/
+        run: ls -la ./
 
       - name: 'Login via Azure CLI'
         # if: env.deploy == 'true'
