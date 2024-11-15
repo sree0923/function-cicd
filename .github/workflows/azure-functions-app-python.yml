@@ -45,6 +45,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
+      - name: Debug List files in folder
+        run: |
+         cd ${{ matrix.app.folder }}
+         ls -la          
+
       - name: Create ZIP package
         run: |
           cd ${{ matrix.app.folder }}
