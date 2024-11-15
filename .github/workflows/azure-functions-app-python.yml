@@ -53,7 +53,7 @@ jobs:
       - name: Create ZIP package
         run: |
           cd ${{ matrix.app.folder }}
-          zip -r function_app.zip 
+          zip -r function_app.zip .
 
       - name: List files after ZIP creation
         run: ls -R          
