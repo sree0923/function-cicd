@@ -56,16 +56,21 @@ jobs:
       - name: Create ZIP package
         run: |
           cd ${{ matrix.app.folder }}
-          zip -r function_app.zip .
+          zip -r ../${{ matrix.app.folder }}.zip .
 
       - name: List files after ZIP creation
-        run: ls -R          
+        run: ls -R 
+
+      - name:  Check ZIP File
+        run: |
+          ls -la ./
+          file ./${{ matrix.app.folder }}.zip                 
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ./${{ matrix.app.folder }}/function_app.zip
+          path: ./${{ matrix.app.folder }}.zip
 
   build-and-deploy-dev:
     runs-on: ubuntu-latest
@@ -112,7 +117,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ./${{ matrix.app.folder }}/function_app.zip
+          path: ./${{ matrix.app.folder }}.zip
 
       - name:  Verify ZIP file
         run: ls -la ./fn-dev1/          
@@ -129,7 +134,7 @@ jobs:
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
-          package: ./${{ matrix.app.folder }}/function_app.zip 
+          package: ./${{ matrix.app.folder }}.zip 
 
   build-and-deploy-qa:
     runs-on: ubuntu-latest
