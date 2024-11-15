@@ -133,7 +133,7 @@ jobs:
         run: ls -la ./
 
       - name: Unzip artifact for deployment
-        run: unzip ${{ matrix.app.folder }}.zip
+        run: unzip ./${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
         run: ls -la ./        
