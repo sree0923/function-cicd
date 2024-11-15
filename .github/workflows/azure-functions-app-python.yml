@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ${{ matrix.app.folder }}/function_app.zip
+          path: ./${{ matrix.app.folder }}/function_app.zip
 
   build-and-deploy-dev:
     runs-on: ubuntu-latest
