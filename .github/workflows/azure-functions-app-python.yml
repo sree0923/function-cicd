@@ -45,17 +45,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
-      - name: Build the Azure Function App
+      - name: Create ZIP package
         run: |
           cd ${{ matrix.app.folder }}
-          zip -r function_app.zip .
-          mv function_app.zip ../${{ matrix.app.folder }}_function_app.zip
+          zip -r function_app.zip 
+
+      - name: List files after ZIP creation
+        run: ls -R          
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ${{ matrix.app.folder }}/${{ matrix.app.folder }}_function_app.zip
+          path: ${{ matrix.app.folder }}/function_app.zip
 
   build-and-deploy-dev:
     runs-on: ubuntu-latest
@@ -99,10 +101,10 @@ jobs:
       #     python -m pip install --upgrade pip
       #     pip install -r requirements.txt --target=".python_packages/lib/site-packages"
       - name: Download build artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.app.folder }}-build
-          path: ${{ matrix.app.folder }}/${{ matrix.app.folder }}_function_app.zip
+          path: ${{ matrix.app.folder }}/function_app.zip
 
       - name: 'Login via Azure CLI'
         if: env.deploy == 'true'
