@@ -134,20 +134,20 @@ jobs:
         run: ls -la ./
 
       - name: Unzip artifact for deployment
+        if: env.deploy == 'true'
         run: unzip -o ${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
         run: ls -la ./      
 
       - name: 'Login via Azure CLI'
-        # if: env.deploy == 'true'
+        if: env.deploy == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
-        # if: env.deploy == 'true'
-        #if: contains(github.event.head_commit.message, matrix.app.folder) # Check if commit includes folder changes
+        if: env.deploy == 'true'
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
@@ -173,6 +173,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download build artifact
+        if: env.deploy == 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
@@ -182,18 +183,20 @@ jobs:
         run: ls -la ./
 
       - name: Unzip artifact for deployment
+        if: env.deploy == 'true'
         run: unzip -o ${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
         run: ls -la ./      
 
       - name: 'Login via Azure CLI'
-        # if: env.deploy == 'true'
+        if: env.deploy == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
+        if: env.deploy == 'true'
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
