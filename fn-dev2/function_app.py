@@ -20,6 +20,6 @@ def http_trigger2(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
     else:
         return func.HttpResponse(
-             "This HTTP triggered2 function executed successfully 3456",
+             "This HTTP triggered2 function executed successfully 345678",
              status_code=200
         )
