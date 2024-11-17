@@ -124,6 +124,7 @@ jobs:
       #     python -m pip install --upgrade pip
       #     pip install -r requirements.txt --target=".python_packages/lib/site-packages"
       - name: Download build artifact
+        if: env.deploy == 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
