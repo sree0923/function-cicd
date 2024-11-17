@@ -180,7 +180,56 @@ jobs:
           scm-do-build-during-deployment: true
           enable-oryx-build: true        
 
+  build-and-deploy-prod:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-qa
+    environment: prod
+    strategy:
+      matrix:
+        app:
+          - name: "fn-cicd-prod1"
+            folder: "fn-dev1"	
+          - name: "fn-cicd-prod2"
+            folder: "fn-dev2"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        # if: env.deploy == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.app.folder }}-build
+          # path: ./${{ matrix.app.folder }}.zip
+
+      - name:  Verify ZIP file
+        run: ls -la ./
+
+      - name: Unzip artifact for deployment
+        # if: env.deploy == 'true'
+        run: unzip -o ${{ matrix.app.folder }}.zip
         
+      - name:  Verify ZIP file
+        run: ls -la ./      
+
+      - name: 'Login via Azure CLI'
+        # if: env.deploy == 'true'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  
+
+      - name: Deploy to Azure Function App
+        # if: env.deploy == 'true'
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ matrix.app.name }}
+          # package: ./${{ matrix.app.folder }}.zip
+          package: '.'
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true 
+          
+         
 
 
 
