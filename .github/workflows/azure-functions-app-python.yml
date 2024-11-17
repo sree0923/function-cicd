@@ -31,21 +31,11 @@ jobs:
           if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
             echo "Folder ${{ matrix.app.folder }} has changes."
             echo "deploy=true" >> $GITHUB_ENV
-            echo "true" > deploy_status.txt
           else  
             echo "No changes in ${{ matrix.app.folder }}."
             echo "deploy=false" >> $GITHUB_ENV 
-            echo "false" > deploy_status.txt
-          fi 
-          
-      # - name: Set Job Output
-      #   id: set_output
-      #   run: |
-      #       deploy_status=$(<deploy_status.txt)
-      #       echo "::set-output name=deploy::$deploy_status"
-      #   outputs:
-      #     deploy: ${{ steps.set_output.outputs.deploy }}          
-
+          fi    
+   
       - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
         uses: actions/setup-python@v4
         with:
@@ -60,29 +50,29 @@ jobs:
           pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
       - name: Debug List files in folder
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         run: |
          cd ${{ matrix.app.folder }}
          ls -la          
 
       - name: Create ZIP package
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         run: |
           cd ${{ matrix.app.folder }}
           zip -r ./${{ matrix.app.folder }}.zip .
 
       - name: List files after ZIP creation
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         run: ls -R 
 
       - name:  Check ZIP File
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         run: |
           ls -la ./
           file ./${{ matrix.app.folder }}.zip                 
 
       - name: Upload build artifact
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
@@ -91,7 +81,6 @@ jobs:
   build-and-deploy-dev:
     runs-on: ubuntu-latest
     needs: build
-    if: needs.deploy.outputs.deploy-status == 'true'
     environment: dev
     env:
  # set this to the path to your function app project, defaults to the repository root
@@ -108,32 +97,7 @@ jobs:
     steps:  
       - name: Checkout code
         uses: actions/checkout@v4
-        # with:
-        #   fetch-depth: 2
 
-      # - name: Check if folder has changes
-      #   id: check_changes
-      #   run: |
-      #     if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
-      #       echo "Folder ${{ matrix.app.folder }} has changes."
-      #       echo "deploy=true" >> $GITHUB_ENV
-      #     else
-      #       echo "No changes in ${{ matrix.app.folder }}."
-      #       echo "deploy=false" >> $GITHUB_ENV 
-      #     fi          
-
-      # - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     python-version: ${{ env.PYTHON_VERSION }}
-    
-      # - name: 'Resolve Project Dependencies Using Pip'
-      #   if: env.deploy == 'true'
-      #   shell: bash
-      #   run: |
-      #     cd ${{ matrix.app.folder }}
-      #     python -m pip install --upgrade pip
-      #     pip install -r requirements.txt --target=".python_packages/lib/site-packages"
       - name: Download build artifact
         # if: env.deploy == 'true'
         uses: actions/download-artifact@v4
@@ -170,7 +134,6 @@ jobs:
   build-and-deploy-qa:
     runs-on: ubuntu-latest
     needs: build-and-deploy-dev
-    if: needs.build.outputs.deploy == 'true'
     environment: qa
     strategy:
       matrix:
