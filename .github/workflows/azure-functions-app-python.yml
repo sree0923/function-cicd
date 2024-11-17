@@ -31,10 +31,20 @@ jobs:
           if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
             echo "Folder ${{ matrix.app.folder }} has changes."
             echo "deploy=true" >> $GITHUB_ENV
-          else
+            echo "true" > deploy_status.txt
+          else  
             echo "No changes in ${{ matrix.app.folder }}."
             echo "deploy=false" >> $GITHUB_ENV 
-          fi          
+            echo "false" > deploy_status.txt
+          fi 
+          
+      # - name: Set Job Output
+      #   id: set_output
+      #   run: |
+      #       deploy_status=$(<deploy_status.txt)
+      #       echo "::set-output name=deploy::$deploy_status"
+      #   outputs:
+      #     deploy: ${{ steps.set_output.outputs.deploy }}          
 
       - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
         uses: actions/setup-python@v4
@@ -81,6 +91,7 @@ jobs:
   build-and-deploy-dev:
     runs-on: ubuntu-latest
     needs: build
+    if: needs.deploy.outputs.deploy-status == 'true'
     environment: dev
     env:
  # set this to the path to your function app project, defaults to the repository root
@@ -124,7 +135,7 @@ jobs:
       #     python -m pip install --upgrade pip
       #     pip install -r requirements.txt --target=".python_packages/lib/site-packages"
       - name: Download build artifact
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
@@ -134,20 +145,20 @@ jobs:
         run: ls -la ./
 
       - name: Unzip artifact for deployment
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         run: unzip -o ${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
         run: ls -la ./      
 
       - name: 'Login via Azure CLI'
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
@@ -159,6 +170,7 @@ jobs:
   build-and-deploy-qa:
     runs-on: ubuntu-latest
     needs: build-and-deploy-dev
+    if: needs.build.outputs.deploy == 'true'
     environment: qa
     strategy:
       matrix:
@@ -183,20 +195,20 @@ jobs:
         run: ls -la ./
 
       - name: Unzip artifact for deployment
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         run: unzip -o ${{ matrix.app.folder }}.zip
         
       - name:  Verify ZIP file
         run: ls -la ./      
 
       - name: 'Login via Azure CLI'
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
-        if: env.deploy == 'true'
+        # if: env.deploy == 'true'
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
