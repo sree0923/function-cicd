@@ -42,7 +42,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
   
       - name: 'Resolve Project Dependencies Using Pip'
-        #if: env.deploy == 'true'
+        if: env.deploy == 'true'
         shell: bash
         run: |
           cd ${{ matrix.app.folder }}
@@ -50,29 +50,29 @@ jobs:
           pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
       - name: Debug List files in folder
+        if: env.deploy == 'true'
         run: |
          cd ${{ matrix.app.folder }}
          ls -la          
 
       - name: Create ZIP package
+        if: env.deploy == 'true'
         run: |
           cd ${{ matrix.app.folder }}
           zip -r ./${{ matrix.app.folder }}.zip .
 
-      # - name: Zip artifact for deployment 
-      #   run: |
-      #     cd ${{ matrix.app.folder }}
-      #     zip ${{ matrix.app.folder }}.zip ./* -r 
-
       - name: List files after ZIP creation
+        if: env.deploy == 'true'
         run: ls -R 
 
       - name:  Check ZIP File
+        if: env.deploy == 'true'
         run: |
           ls -la ./
           file ./${{ matrix.app.folder }}.zip                 
 
       - name: Upload build artifact
+        if: env.deploy == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app.folder }}-build
@@ -193,8 +193,6 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  
 
       - name: Deploy to Azure Function App
-        # if: env.deploy == 'true'
-        #if: contains(github.event.head_commit.message, matrix.app.folder) # Check if commit includes folder changes
         uses: azure/functions-action@v1
         with:
           app-name: ${{ matrix.app.name }}
