@@ -27,21 +27,21 @@ jobs:
         id: set-matrix
         run: |
           MATRIX=$(yq e -o=json '.apps' app.yaml)
+          echo "Generated MATRIX: $MATRIX"
           echo "::set-output name=matrix::$MATRIX"
-        env:
-          MATRIX: ""
 
   deploy-dev:
     runs-on: ubuntu-latest
     environment: develop
     strategy:
-      matrix:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
         # app:
           # - name: "fn-cicd-dev1"
           #   folder: "fn-dev1"	
           # - name: "fn-cicd-dev2"
           #   folder: "fn-dev2"
-        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+          
+        # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
