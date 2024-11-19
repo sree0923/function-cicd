@@ -8,26 +8,64 @@ on:
       - qa
       - main
       - 'release/*'
-      - prod
+      - prod    
 env:
  # set this to the path to your function app project, defaults to the repository root
   PYTHON_VERSION: '3.9' 
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
 
-jobs:     
+jobs: 
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Determine Environment
+        id: determine-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "env=dev" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/qa" ]]; then
+            echo "env=qa" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            echo "env=staging" >> $GITHUB_ENV
+          else
+            echo "Unknown branch; exiting."
+            exit 1
+          fi        
+      - name: Read JSON and Generate Matrix for ${{ env.env }}
+        id: set-matrix
+        run: |
+          MATRIX=$(jq -c ".${{ env.env }}" app.json)
+          echo "Generated MATRIX: $MATRIX"
+          echo "::set-output name=matrix::$MATRIX"
+      # - name: Read JSON and Generate Matrix
+      #   id: set-matrix
+      #   run: |
+      #     MATRIX=$(jq -c '.apps' apps.json)
+      #     echo "Generated MATRIX: $MATRIX"
+      #     echo "::set-output name=matrix::$MATRIX"
+      - name: Log Generated Matrix
+        run: |
+          echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
+
   deploy-dev:
     runs-on: ubuntu-latest
+    needs: generate-matrix
     if: github.ref == 'refs/heads/develop'
     environment: develop
     strategy:
       matrix: 
-        app:
-          - name: "fn-cicd-dev1"
-            folder: "fn-dev1"	
-          - name: "fn-cicd-dev2"
-            folder: "fn-dev2"
+        # app:
+        #   - name: "fn-cicd-dev1"
+        #     folder: "fn-dev1"	
+        #   - name: "fn-cicd-dev2"
+        #     folder: "fn-dev2"
           
-        # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+       app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,16 +113,17 @@ jobs:
           
   deploy-qa:
     runs-on: ubuntu-latest
+    needs: generate-matrix
     if: github.ref == 'refs/heads/qa'
     environment: qa
     strategy:
       matrix: 
-        app:
-          - name: "fn-cicd-qa1"
-            folder: "fn-dev1"	
-          - name: "fn-cicd-qa2"
-            folder: "fn-dev2"
-          
+        # app:
+        #   - name: "fn-cicd-qa1"
+        #     folder: "fn-dev1"	
+        #   - name: "fn-cicd-qa2"
+        #     folder: "fn-dev2"
+        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }} 
         # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
@@ -143,7 +182,7 @@ jobs:
           - name: "fn-cicd-prod2"
             folder: "fn-dev2"
           
-        # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+        # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

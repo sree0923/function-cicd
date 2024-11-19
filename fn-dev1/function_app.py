@@ -20,6 +20,6 @@ def http_trigger1(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
     else:
         return func.HttpResponse(
-             "This HTTP triggered1 function executed for dev and qa ",
+             "This HTTP triggered1 function executed for dev and qa calling from json file testing in dev and qa",
              status_code=200
         )
