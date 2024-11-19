@@ -28,24 +28,29 @@ jobs:
         run: |
           MATRIX=$(yq e -o=json '.apps' app.yaml)
           echo "Generated MATRIX: $MATRIX"
+          if [[ -z "$MATRIX" ]]; then
+            echo "Error: MATRIX is empty"
+            exit 1
+          fi
           echo "::set-output name=matrix::$MATRIX"
 
-      - name: Debug generated MATRIX
+      - name: Log Generated Matrix
         run: |
-         echo "Generated MATRIX: $MATRIX"    
+          echo "Generated MATRIX: ${{ steps.set-matrix.outputs.matrix }}"       
 
   deploy-dev:
     runs-on: ubuntu-latest
+    needs: generate-matrix
     environment: develop
     strategy:
-      matrix: 
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
         # app:
           # - name: "fn-cicd-dev1"
           #  folder: "fn-dev1"	
           # - name: "fn-cicd-dev2"
           #   folder: "fn-dev2"
           
-        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+        # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
