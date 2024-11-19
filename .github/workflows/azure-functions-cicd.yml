@@ -138,9 +138,9 @@ jobs:
     strategy:
       matrix: 
         app:
-          - name: "fn-cicd-dev1"
+          - name: "fn-cicd-prod1"
             folder: "fn-dev1"	
-          - name: "fn-cicd-dev2"
+          - name: "fn-cicd-prod2"
             folder: "fn-dev2"
           
         # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
