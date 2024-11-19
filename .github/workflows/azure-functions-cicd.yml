@@ -30,6 +30,10 @@ jobs:
           echo "Generated MATRIX: $MATRIX"
           echo "::set-output name=matrix::$MATRIX"
 
+      - name: Debug generated MATRIX
+        run: |
+         echo "Generated MATRIX: $MATRIX"    
+
   deploy-dev:
     runs-on: ubuntu-latest
     environment: develop
@@ -37,7 +41,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
         # app:
           # - name: "fn-cicd-dev1"
-          #   folder: "fn-dev1"	
+          #  folder: "fn-dev1"	
           # - name: "fn-cicd-dev2"
           #   folder: "fn-dev2"
           
