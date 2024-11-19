@@ -1,0 +1,80 @@
+
+name: CICD for Azure Function App
+
+on:
+  push:
+    branches: ["main"]
+env:
+ # set this to the path to your function app project, defaults to the repository root
+  PYTHON_VERSION: '3.9' 
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment: develop
+    strategy:
+      matrix:
+        app:
+          - name: "fn-cicd-dev1"
+            folder: "fn-dev1"	
+          - name: "fn-cicd-dev2"
+            folder: "fn-dev2"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+      - name: Check if folder has changes
+        id: check_changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
+            echo "Folder ${{ matrix.app.folder }} has changes."
+            echo "deploy=true" >> $GITHUB_ENV
+          else  
+            echo "No changes in ${{ matrix.app.folder }}."
+            echo "deploy=false" >> $GITHUB_ENV 
+          fi    
+   
+      - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
+        if: env.deploy == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+  
+      - name: 'Resolve Project Dependencies Using Pip'
+        if: env.deploy == 'true'
+        shell: bash
+        run: |
+          cd ${{ matrix.app.folder }}
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+
+      - name: 'Login via Azure CLI'
+        if: env.deploy == 'true'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}           
+
+      - name: Deploy to Azure Function App
+        if: env.deploy == 'true'
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ matrix.app.name }}
+          package: ./${{ matrix.app.folder }}.zip
+          # package: '.'
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true          
+
+
+
+
+
+
+
+
+
+         
+
+
+
