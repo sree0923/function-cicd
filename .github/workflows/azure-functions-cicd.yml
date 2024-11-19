@@ -26,7 +26,7 @@ jobs:
       - name: Parse apps.yaml and generate matrix
         id: set-matrix
         run: |
-          MATRIX=$(yq e -o=json '.apps' apps.yaml)
+          MATRIX=$(yq e -o=json '.apps' app.yaml)
           echo "::set-output name=matrix::$MATRIX"
         env:
           MATRIX: ""
