@@ -26,7 +26,7 @@ jobs:
       - name: Parse apps.yaml and generate matrix
         id: set-matrix
         run: |
-          MATRIX=$(yq e -o=json '.apps' app.yaml)
+          MATRIX=$(yq e -o=json '.app' app.yaml)
           echo "Generated MATRIX: $MATRIX"
           if [[ -z "$MATRIX" ]]; then
             echo "Error: MATRIX is empty"
