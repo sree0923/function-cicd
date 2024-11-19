@@ -18,5 +18,15 @@
       "name": "fn-cicd-qa2",
       "folder": "fn-dev2"
     }
+  ],
+  "prod": [
+    {
+      "name": "fn-cicd-prod1",
+      "folder": "fn-dev1"
+    },
+    {
+      "name": "fn-cicd-prod2",
+      "folder": "fn-dev2"
+    }
   ]
 }

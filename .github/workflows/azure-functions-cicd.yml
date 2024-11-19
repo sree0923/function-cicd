@@ -10,7 +10,6 @@ on:
       - 'release/*'
       - prod    
 env:
- # set this to the path to your function app project, defaults to the repository root
   PYTHON_VERSION: '3.9' 
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
 
@@ -44,12 +43,6 @@ jobs:
           MATRIX=$(jq -c ".${{ env.env }}" app.json)
           echo "Generated MATRIX: $MATRIX"
           echo "::set-output name=matrix::$MATRIX"
-      # - name: Read JSON and Generate Matrix
-      #   id: set-matrix
-      #   run: |
-      #     MATRIX=$(jq -c '.apps' apps.json)
-      #     echo "Generated MATRIX: $MATRIX"
-      #     echo "::set-output name=matrix::$MATRIX"
       - name: Log Generated Matrix
         run: |
           echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
