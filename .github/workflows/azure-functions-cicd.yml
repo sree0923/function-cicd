@@ -38,14 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: develop
     strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+      matrix: 
         # app:
           # - name: "fn-cicd-dev1"
           #  folder: "fn-dev1"	
           # - name: "fn-cicd-dev2"
           #   folder: "fn-dev2"
           
-        # app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
