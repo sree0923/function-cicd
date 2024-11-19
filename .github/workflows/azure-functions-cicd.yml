@@ -75,7 +75,13 @@ jobs:
           else  
             echo "No changes in ${{ matrix.app.folder }}."
             echo "deploy=false" >> $GITHUB_ENV 
-          fi    
+          fi   
+          
+      - name: Skip Deployment if No Changes
+        if: env.deploy == 'false'
+        run: |
+         echo "No changes detected in the folder. Skipping deployment."
+         exit 0          
    
       - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
         if: env.deploy == 'true'
