@@ -10,16 +10,38 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install yq (YAML parser)
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Parse apps.yaml and generate matrix
+        id: set-matrix
+        run: |
+          MATRIX=$(yq e -o=json '.apps' apps.yaml)
+          echo "::set-output name=matrix::$MATRIX"
+        env:
+          MATRIX: ""
+
   deploy-dev:
     runs-on: ubuntu-latest
     environment: develop
     strategy:
       matrix:
-        app:
-          - name: "fn-cicd-dev1"
-            folder: "fn-dev1"	
-          - name: "fn-cicd-dev2"
-            folder: "fn-dev2"
+        # app:
+          # - name: "fn-cicd-dev1"
+          #   folder: "fn-dev1"	
+          # - name: "fn-cicd-dev2"
+          #   folder: "fn-dev2"
+        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
