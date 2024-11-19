@@ -9,6 +9,7 @@ on:
       - main
       - 'release/*'
       - prod
+  workflow_dispatch:    
 env:
  # set this to the path to your function app project, defaults to the repository root
   PYTHON_VERSION: '3.9' 
