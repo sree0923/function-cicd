@@ -19,8 +19,7 @@ on:
   secrets:
     azure-credentials:
         required: true
- 
-
+        
 jobs:
   deploy-template:
     runs-on: ubuntu-latest
