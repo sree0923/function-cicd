@@ -8,13 +8,19 @@ on:
       - qa
       - main
       - 'release/*'
-      - prod    
+  pull_request:
+    branches:
+      - develop
+      - qa
+      - main
+      - 'release/*' 
 env:
   PYTHON_VERSION: '3.9' 
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
 
 jobs: 
   generate-matrix:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -22,21 +28,50 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # - name: Determine Environment
+      #   id: determine-env
+      #   run: |
+      #     if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+      #       echo "env=dev" >> $GITHUB_ENV
+      #     elif [[ "${{ github.ref }}" == "refs/heads/qa" ]]; then
+      #       echo "env=qa" >> $GITHUB_ENV
+      #     elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+      #       echo "env=staging" >> $GITHUB_ENV
+      #     elif [[ "${{ github.ref }}" == refs/heads/prod ]]; then
+      #       echo "env=prod" >> $GITHUB_ENV            
+      #     else
+      #       echo "Unknown branch; exiting."
+      #       exit 1
+      #     fi 
+      
       - name: Determine Environment
         id: determine-env
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "env=dev" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == "refs/heads/qa" ]]; then
-            echo "env=qa" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
-            echo "env=staging" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == refs/heads/prod ]]; then
-            echo "env=prod" >> $GITHUB_ENV            
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Determine the source branch of the PR
+            branch="${{ github.head_ref }}"
+            echo "Detected PR from branch: $branch"
           else
-            echo "Unknown branch; exiting."
+            # Use the branch from the push or other events
+            branch="${{ github.ref }}" 
+            branch="${branch#refs/heads/}"
+            echo "Detected branch: $branch"
+          fi
+      
+          # Map branch to environment
+          if [[ "$branch" == "develop" ]]; then
+            echo "env=dev" >> $GITHUB_ENV
+          elif [[ "$branch" == "qa" ]]; then
+            echo "env=qa" >> $GITHUB_ENV
+          elif [[ "$branch" == release/* ]]; then
+            echo "env=staging" >> $GITHUB_ENV
+          elif [[ "$branch" == "prod" ]]; then
+            echo "env=prod" >> $GITHUB_ENV
+          else
+            echo "Unknown branch: $branch; exiting."
             exit 1
-          fi        
+          fi
+          
       - name: Read JSON and Generate Matrix for ${{ env.env }}
         id: set-matrix
         run: |
@@ -75,7 +110,13 @@ jobs:
           else  
             echo "No changes in ${{ matrix.app.folder }}."
             echo "deploy=false" >> $GITHUB_ENV 
-          fi    
+          fi   
+          
+      - name: Skip Deployment if No Changes
+        if: env.deploy == 'false'
+        run: |
+         echo "No changes detected in the folder. Skipping deployment."
+         exit 0          
    
       - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
         if: env.deploy == 'true'
