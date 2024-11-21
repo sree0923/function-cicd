@@ -4,6 +4,7 @@ name: CICD for Azure Function App
 on:
   push:
     branches:
+      - "feature/**"
       - develop
       - qa
       - main
@@ -88,64 +89,64 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     environment: develop
     strategy:
-      matrix: 
-        # app:
-        #   - name: "fn-cicd-dev1"
-        #     folder: "fn-dev1"	
-        #   - name: "fn-cicd-dev2"
-        #     folder: "fn-dev2"
-          
+      matrix:          
        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0                     
-      - name: Check if folder has changes
-        id: check_changes
-        run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
-            echo "Folder ${{ matrix.app.folder }} has changes."
-            echo "deploy=true" >> $GITHUB_ENV
-          else  
-            echo "No changes in ${{ matrix.app.folder }}."
-            echo "deploy=false" >> $GITHUB_ENV 
-          fi   
+    - name: Deploy App
+      uses: ./.github/workflows/deploy-template.yml
+      with:
+        app-name: ${{ matrix.app.name }}
+        package: ./${{ matrix.app.folder }}  
+    # steps:
+    #   - name: Checkout repository
+    #     uses: actions/checkout@v4
+    #     with:
+    #       fetch-depth: 0                     
+    #   - name: Check if folder has changes
+    #     id: check_changes
+    #     run: |
+    #       if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
+    #         echo "Folder ${{ matrix.app.folder }} has changes."
+    #         echo "deploy=true" >> $GITHUB_ENV
+    #       else  
+    #         echo "No changes in ${{ matrix.app.folder }}."
+    #         echo "deploy=false" >> $GITHUB_ENV 
+    #       fi   
           
-      - name: Skip Deployment if No Changes
-        if: env.deploy == 'false'
-        run: |
-         echo "No changes detected in the folder. Skipping deployment."
-         exit 0          
+    #   - name: Skip Deployment if No Changes
+    #     if: env.deploy == 'false'
+    #     run: |
+    #      echo "No changes detected in the folder. Skipping deployment."
+    #      exit 0          
    
-      - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
-        if: env.deploy == 'true'
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+    #   - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
+    #     if: env.deploy == 'true'
+    #     uses: actions/setup-python@v4
+    #     with:
+    #       python-version: ${{ env.PYTHON_VERSION }}
   
-      - name: 'Resolve Project Dependencies Using Pip'
-        if: env.deploy == 'true'
-        shell: bash
-        run: |
-          cd ${{ matrix.app.folder }}
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+    #   - name: 'Resolve Project Dependencies Using Pip'
+    #     if: env.deploy == 'true'
+    #     shell: bash
+    #     run: |
+    #       cd ${{ matrix.app.folder }}
+    #       python -m pip install --upgrade pip
+    #       pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
-      - name: 'Login via Azure CLI'
-        if: env.deploy == 'true'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}           
+    #   - name: 'Login via Azure CLI'
+    #     if: env.deploy == 'true'
+    #     uses: azure/login@v1
+    #     with:
+    #       creds: ${{ secrets.AZURE_CREDENTIALS }}           
 
-      - name: Deploy to Azure Function App on develop branch
-        if: env.deploy == 'true'
-        uses: azure/functions-action@v1
-        with:
-          app-name: ${{ matrix.app.name }}
-          package: ./${{ matrix.app.folder }}
-          scm-do-build-during-deployment: true
-          enable-oryx-build: true   
+    #   - name: Deploy to Azure Function App on develop branch
+    #     if: env.deploy == 'true'
+    #     uses: azure/functions-action@v1
+    #     with:
+    #       app-name: ${{ matrix.app.name }}
+    #       package: ./${{ matrix.app.folder }}
+    #       scm-do-build-during-deployment: true
+    #       enable-oryx-build: true   
           
   deploy-qa:
     runs-on: ubuntu-latest
