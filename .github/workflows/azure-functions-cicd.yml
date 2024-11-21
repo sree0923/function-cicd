@@ -48,8 +48,8 @@ jobs:
         id: determine-env
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Determine the source branch of the PR
-            branch="${{ github.head_ref }}"
+            # Determine the base branch of the PR
+            branch="${{ github.base_ref }}"
             echo "Detected PR from branch: $branch"
           else
             # Use the branch from the push or other events
