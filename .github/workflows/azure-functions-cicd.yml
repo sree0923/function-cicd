@@ -8,13 +8,19 @@ on:
       - qa
       - main
       - 'release/*'
-      - prod    
+  pull_request:
+    branches:
+      - develop
+      - qa
+      - main
+      - 'release/*' 
 env:
   PYTHON_VERSION: '3.9' 
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
 
 jobs: 
   generate-matrix:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
