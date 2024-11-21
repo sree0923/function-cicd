@@ -2,13 +2,17 @@ name: Deploy Template
 
 on:
  workflow_call:
-    inputs:
-      app-name:
+  inputs:
+    app-name:
         required: true
         type: string
-      package:
+    app-folder:
         required: true
         type: string
+    python-version:
+        required: false
+        type: string
+        default: "3.9"
 
 jobs:
   deploy-template:
@@ -21,11 +25,11 @@ jobs:
         - name: Check if folder has changes
           id: check_changes
           run: |
-            if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.app.folder }}/"; then
-              echo "Folder ${{ matrix.app.folder }} has changes."
+            if git diff --name-only HEAD~1 HEAD | grep -q "^${{ inputs.app-folder }}/"; then
+              echo "Folder ${{ inputs.app-folder }} has changes."
               echo "deploy=true" >> $GITHUB_ENV
             else  
-              echo "No changes in ${{ matrix.app.folder }}."
+              echo "No changes in ${{ inputs.app-folder }}."
               echo "deploy=false" >> $GITHUB_ENV 
             fi   
             
@@ -39,13 +43,13 @@ jobs:
           if: env.deploy == 'true'
           uses: actions/setup-python@v4
           with:
-            python-version: ${{ env.PYTHON_VERSION }}
+            python-version: ${{ inputs.python-version }}
     
         - name: 'Resolve Project Dependencies Using Pip'
           if: env.deploy == 'true'
           shell: bash
           run: |
-            cd ${{ matrix.app.folder }}
+            cd ${{ inputs.app-folder }}
             python -m pip install --upgrade pip
             pip install -r requirements.txt --target=".python_packages/lib/site-packages"
   
@@ -59,7 +63,7 @@ jobs:
           if: env.deploy == 'true'
           uses: azure/functions-action@v1
           with:
-            app-name: ${{ matrix.app.name }}
-            package: ./${{ matrix.app.folder }}
+            app-name: ${{ inputs.app-name }}
+            package: ./${{ inputs.app-folder }}
             scm-do-build-during-deployment: true
             enable-oryx-build: true    
