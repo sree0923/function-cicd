@@ -92,9 +92,11 @@ jobs:
       matrix:          
        app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
-    - name: Deploy App
-      uses: ./.github/workflows/deploy-template.yml
-      with:
+     - name: Checkout repository
+       uses: actions/checkout@v4  
+     - name: Deploy App
+       uses: ./.github/workflows/deploy-template.yml
+       with:
         app-name: ${{ matrix.app.name }}
         package: ./${{ matrix.app.folder }}  
     # steps:
