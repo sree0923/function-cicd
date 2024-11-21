@@ -13,14 +13,16 @@ on:
         required: true
         type: string
         default: "3.9"
-    azure-credentials:
-        required: true 
-        type: string
+    # azure-credentials:
+    #     required: true 
+    #     type: string
  
 
 jobs:
   deploy-template:
     runs-on: ubuntu-latest
+    env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     steps:
         - name: Checkout repository
           uses: actions/checkout@v4
@@ -61,7 +63,7 @@ jobs:
           if: env.deploy == 'true'
           uses: azure/login@v1
           with:
-            creds: ${{ inputs.azure-credentials }}           
+            creds: ${{ env.AZURE_CREDENTIALS }}         
   
         - name: Deploy to Azure Function App on develop branch
           if: env.deploy == 'true'

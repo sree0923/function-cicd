@@ -95,7 +95,6 @@ jobs:
     with:
       app-name: ${{ matrix.app.name }}
       app-folder: ${{ matrix.app.folder }}
-      azure-credentials: ${{ secrets.AZURE_CREDENTIALS }} 
       # package: ./${{ matrix.app.folder }}  
     # steps:
     #   - name: Checkout repository
