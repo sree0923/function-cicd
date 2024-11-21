@@ -13,9 +13,9 @@ on:
         required: false
         type: string
         default: "3.9"
-    # azure-credentials:
-    #     required: true 
-    #     type: string
+  secrets:
+    azure-credentials:
+        required: true
  
 
 jobs:
@@ -61,7 +61,7 @@ jobs:
           if: env.deploy == 'true'
           uses: azure/login@v1
           with:
-            creds: ${{ env.AZURE_CREDENTIALS }}         
+            creds: ${{ secrets.azure-credentials}}         
   
         - name: Deploy to Azure Function App on develop branch
           if: env.deploy == 'true'
