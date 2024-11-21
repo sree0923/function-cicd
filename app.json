@@ -13,7 +13,7 @@
     {
       "name": "fn-cicd-qa1",
       "folder": "fn-dev1"
-    },
+    }
     {
       "name": "fn-cicd-qa2",
       "folder": "fn-dev2"
