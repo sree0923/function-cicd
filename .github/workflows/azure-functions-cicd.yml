@@ -84,17 +84,26 @@ jobs:
           echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
 
   deploy-dev:
-    uses: sree0923/function-cicd/.github/workflows/deploy-template.yml@develop
-    # runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:  # Set environment variables for the job here
+     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     needs: generate-matrix
-    if: github.ref == 'refs/heads/develop'
-    # environment: develop
+    if: github.ref == 'refs/heads/develop' 
+    environment: develop
     strategy:
       matrix:          
-       app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}       
-    with:
-      app-name: ${{ matrix.app.name }}
-      app-folder: ${{ matrix.app.folder }}
+       app: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}  
+    steps:
+     - name: Checkout repository
+       uses: actions/checkout@v4
+
+     - name: Call Reusable Workflow
+       uses: sree0923/function-cicd/.github/workflows/deploy-template.yml@develop  # Replace with actual path
+       with:
+        app-name: ${{ matrix.app.name }}
+        app-folder: ${{ matrix.app.folder }}          
+
+ 
       # package: ./${{ matrix.app.folder }}  
     # steps:
     #   - name: Checkout repository
