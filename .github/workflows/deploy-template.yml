@@ -10,9 +10,13 @@ on:
         required: true
         type: string
     python-version:
-        required: false
+        required: true
         type: string
         default: "3.9"
+    azure-credentials:
+        required: true 
+        type: string
+ 
 
 jobs:
   deploy-template:
@@ -57,7 +61,7 @@ jobs:
           if: env.deploy == 'true'
           uses: azure/login@v1
           with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}           
+            creds: ${{ inputs.azure-credentials }}           
   
         - name: Deploy to Azure Function App on develop branch
           if: env.deploy == 'true'
