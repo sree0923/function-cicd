@@ -96,7 +96,7 @@ jobs:
        uses: actions/checkout@v4 
 
      - name: Deploy App
-       uses: sree0923/function-cicd/.github/workflows/deploy-template.yml
+       uses: sree0923/function-cicd/.github/workflows/deploy-template.yml@develop
        with:
         app-name: ${{ matrix.app.name }}
         app-folder: ${{ matrix.app.folder }}
