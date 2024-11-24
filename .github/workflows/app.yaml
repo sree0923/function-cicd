@@ -1,5 +1,0 @@
-apps:
-  - name: "fn-cicd-dev1"
-    folder: "fn-dev1"
-  - name: "fn-cicd-dev2"
-    folder: "fn-dev2"
