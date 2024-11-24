@@ -128,7 +128,7 @@ jobs:
     with:
       app-name: ${{ matrix.app.name }}
       app-folder: ${{ matrix.app.folder }}
-      environment: qa      
+      environment: prod      
  
       # package: ./${{ matrix.app.folder }}  
     # steps:
