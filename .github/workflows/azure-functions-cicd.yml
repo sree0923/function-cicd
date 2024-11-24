@@ -120,7 +120,7 @@ jobs:
       azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
     # runs-on: ubuntu-latest
     needs: generate-matrix
-    if: github.ref == 'refs/heads/qa' 
+    if: github.ref == 'refs/heads/main' 
     # environment: develop
     strategy:
       matrix:          
