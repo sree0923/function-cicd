@@ -62,7 +62,8 @@ jobs:
         run: |
           MATRIX=$(jq -c ".${{ env.env }}" app.json)
           echo "Generated MATRIX: $MATRIX"
-          echo "::set-output name=matrix::$MATRIX"
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+    
       - name: Log Generated Matrix
         run: |
           echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
