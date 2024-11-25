@@ -44,7 +44,7 @@ jobs:
           fi
       
           # Map branch to environment
-          if [[ "$branch" == "develop" ]]; then
+          if [[ "$branch" == "develop" || "$branch" == feature/* ]]; then
             echo "env=dev" >> $GITHUB_ENV
           elif [[ "$branch" == "qa" ]]; then
             echo "env=qa" >> $GITHUB_ENV
@@ -111,7 +111,8 @@ jobs:
     with:
       app-name: ${{ matrix.app.name }}
       app-folder: ${{ matrix.app.folder }}
-      environment: prod      
+      environment: prod
+            
  
 
 
