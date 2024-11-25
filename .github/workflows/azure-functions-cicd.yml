@@ -45,7 +45,7 @@ jobs:
       
           # Map branch to environment
           if [[ "$branch" == "develop" || "$branch" == feature/* ]]; then
-            echo "env=develop" >> $GITHUB_ENV
+            echo "env=dev" >> $GITHUB_ENV
           elif [[ "$branch" == "qa" ]]; then
             echo "env=qa" >> $GITHUB_ENV
           elif [[ "$branch" == release/* ]]; then

@@ -20,6 +20,6 @@ def http_trigger2(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
     else:
         return func.HttpResponse(
-             "This HTTP triggered2 function executed for all environments with branches and templates",
+             "This HTTP triggered2 function executed for all environments with branches and temps",
              status_code=200
         )
