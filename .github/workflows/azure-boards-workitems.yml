@@ -1,0 +1,21 @@
+name: Azure Boards Work Item Link Verification
+on:
+ pull_request:
+   types: [opened, reopened, edited, synchronize, enqueued, ready_for_review]
+
+jobs:
+   check-commit-message:
+      name: Validate Work Item Link
+      runs-on: windows-2019
+      steps:
+       - name: Check Work Item References
+         shell: bash
+         env:
+           pr_desc: ${{ github.event.pull_request.body }}
+         run: |          
+           if [[ ("${pr_desc,,}" == *"fix [ab#"*) || ("${pr_desc,,}" == *"fix ab#"*) || ("${pr_desc,,}" == *"fixes [ab#"*) || ("${pr_desc,,}" == *"fixes ab#"*) || ("${pr_desc,,}" == *"fixed [ab#"*) || ("${pr_desc,,}" == *"fixed ab#"*) ]]; then
+               echo "PR Description contains valid Azure Boards Work Item reference"
+           else
+               echo "PR Description does not contain valid Azure Boards Work Item reference. Please use 'fixes AB#Work Item Number' to add at least one."
+               exit 1
+           fi
