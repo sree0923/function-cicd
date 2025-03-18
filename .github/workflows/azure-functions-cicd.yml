@@ -1,5 +1,5 @@
 
-name: CICD for Azure Function App
+name: function select cicd
 
 on:
   push:
