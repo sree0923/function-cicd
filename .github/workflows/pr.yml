@@ -1,0 +1,142 @@
+name: Create PR
+on:
+  workflow_dispatch:
+      inputs:
+        folders:
+          description: "Comma-separated list of folders to deploy"
+          required: true
+
+        source_branch:
+          description: "Source branch to sync from (e.g., develop, qa)"
+          required: true
+          type: choice
+          options:
+            - develop
+            - qa
+
+        target_branch:
+          description: "Target branch to sync to (e.g., qa, main)"
+          required: true
+          type: choice
+          options:
+            - qa
+            - main
+
+        work_items:
+          description: "Azure Boards Work Item Numbers (e.g 1234,5678)"
+          required: true    
+
+permissions:
+  contents: write
+  pull-requests: write
+  
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensure all branches are fetched
+
+      - name: Parse Selected Folders
+        id: parse-folders
+        run: |
+          echo "FOLDERS=$(echo '${{ github.event.inputs.folders }}' | tr ',' ' ')" >> $GITHUB_ENV          
+
+      - name: Parse Inputs
+        id: parse-inputs
+        run: |
+          echo "SOURCE_BRANCH=${{ github.event.inputs.source_branch }}" >> $GITHUB_ENV
+          echo "TARGET_BRANCH=${{ github.event.inputs.target_branch }}" >> $GITHUB_ENV
+          if [[ -n "${{ github.event.inputs.work_items }}" && "${{ github.event.inputs.work_items }}" != "null" ]]; then
+            # Convert "1234,5678" to "AB#1234,AB#5678"
+            WORK_ITEMS_FORMATTED=$(echo "${{ github.event.inputs.work_items }}" | sed 's/\([^,]*\)/AB#\1/g')
+          else
+            WORK_ITEMS_FORMATTED="No Work Item Provided"
+          fi
+          # Debug: Print formatted work items
+          echo "Formatted work items: '$WORK_ITEMS_FORMATTED'"
+          echo "WORK_ITEMS=$WORK_ITEMS_FORMATTED" >> $GITHUB_ENV
+
+      - name: Ensure Branches Exist
+        run: |
+         git fetch origin $SOURCE_BRANCH
+         git fetch origin $TARGET_BRANCH             
+
+      - name: Switch to Target Branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout $TARGET_BRANCH
+          git pull origin $TARGET_BRANCH --rebase
+          TEMP_BRANCH="sync-${{ github.event.inputs.source_branch }}-to-${{ github.event.inputs.target_branch }}-${{ github.run_id }}"
+          echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV          
+          git checkout -b $TEMP_BRANCH
+          git push origin $TEMP_BRANCH --force-with-lease
+
+      - name: Copy Specific Folders 
+        run: |
+          echo "🔍 Fetching latest branches..."
+          git fetch origin $SOURCE_BRANCH
+          git fetch origin $TARGET_BRANCH
+          git fetch origin $TEMP_BRANCH
+          
+          echo "🔄 Checking out specific folders from $SOURCE_BRANCH..."
+          for folder in $FOLDERS; do
+            echo "✅ Checking out $folder..."
+            git checkout origin/$SOURCE_BRANCH -- "$folder" || (echo "⚠️ Error checking out $folder" && exit 1)
+          done
+          
+          # Detect deleted files
+          DELETED_FILES=$(git log --diff-filter=D --summary origin/$SOURCE_BRANCH -- $FOLDERS | grep delete | awk '{print $NF}')
+          
+          # Stage all changes (new, modified, and deleted files)
+          git add $FOLDERS
+          
+          if [[ -n "$DELETED_FILES" ]]; then
+            echo "❌ Files deleted in $SOURCE_BRANCH: $DELETED_FILES"
+            echo "$DELETED_FILES" | while read file; do
+              git rm -rf --ignore-unmatch "$file"
+            done
+          fi
+          
+          # Check if there are actual changes before committing
+          if git diff --cached --quiet; then
+            echo "✅ No new changes to commit."
+          else
+            echo "Committing changes..."
+            git commit -m "🔄 Sync $FOLDERS from $SOURCE_BRANCH to $TARGET_BRANCH"
+            git push origin $TEMP_BRANCH --force-with-lease
+          fi
+          
+      - name: Create Pull Request
+        run: |
+          # echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          EXISTING_PR=$(gh pr list --base $TARGET_BRANCH --head $TEMP_BRANCH --json number --jq '.[0].number')
+          if [[ -n "$EXISTING_PR" ]]; then
+            echo "🔄 Updating existing PR #$EXISTING_PR..."
+            gh pr edit $EXISTING_PR --title "${{ env.WORK_ITEMS }} Sync $FOLDERS from $SOURCE_BRANCH to $TARGET_BRANCH" --body "${{ env.WORK_ITEMS }} Updated PR to sync $FOLDERS changes."
+          else
+            echo "🚀 Creating PR from $TEMP_BRANCH to $TARGET_BRANCH..."
+            gh pr create \
+              --repo ${{ github.repository }} \
+              --head $TEMP_BRANCH \
+              --base $TARGET_BRANCH \
+              --title "${{ env.WORK_ITEMS }} Sync ${{ env.FOLDERS }} from ${{ env.SOURCE_BRANCH }} to ${{ env.TARGET_BRANCH }}" \
+              --body "${{ env.WORK_ITEMS }} Automated PR to sync ${{ env.FOLDERS }} changes from ${{ env.TEMP_BRANCH  }} to ${{ env.TARGET_BRANCH }}. Commit ID: ${{ github.sha }}" \
+              --label "automation,sync"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+
+      - name: Assign Reviewers
+        run: |
+          if [[ "${{ github.base_ref }}" == "main" ]]; then
+            gh pr edit ${{ github.event.pull_request.number }} --add-reviewer @Multi-Health-Systems/Janus-Admins
+            else
+            gh pr edit ${{ github.event.pull_request.number }} --add-reviewer @Multi-Health-Systems/Janus-Developers
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
