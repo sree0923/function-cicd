@@ -1,20 +1,21 @@
 
-name: function select CICD
+name: function select cicd
 
 on:
-  push:
-    branches:
-      - "feature/**"
-      - develop
-      - qa
-      - main
-      - 'release/*'
-  pull_request:
-    branches:
-      - develop
-      - qa
-      - main
-      - 'release/*' 
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - "feature/**"
+  #     - develop
+  #     - qa
+  #     - main
+  #     - 'release/*'
+  # pull_request:
+  #   branches:
+  #     - develop
+  #     - qa
+  #     - main
+  #     - 'release/*' 
 env:
   PYTHON_VERSION: '3.9' 
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20 : true
