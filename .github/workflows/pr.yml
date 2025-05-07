@@ -33,7 +33,7 @@ permissions:
 jobs:
   sync-and-deploy:
     runs-on: ubuntu-latest
-    permissions: write-all
+    # permissions: write-all
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -140,3 +140,4 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+##################################
