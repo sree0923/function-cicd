@@ -33,7 +33,7 @@ permissions:
 jobs:
   sync-and-deploy:
     runs-on: ubuntu-latest
-    permissions: write-all
+    # permissions: write-all
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -131,6 +131,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
+
+      - name: Generate a github token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_SECRET }}
       - name: Assign Reviewers
         run: |
           if [[ "${{ github.base_ref }}" == "main" ]]; then
@@ -139,4 +146,4 @@ jobs:
             gh pr edit ${{ github.event.pull_request.number }} --add-reviewer sree0923
           fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
